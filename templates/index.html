@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FruitRipe AI (Xception) - Deteksi Kematangan Buah</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            color: #333;
+            line-height: 1.6;
+        }
+
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 15px 0;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-radius: 25px;
+        }
+
+        .nav-item:hover {
+            background: #e8f8f5;
+            color: #27ae60;
+        }
+
+        .nav-item.active {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-callback {
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-callback:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e9 100%);
+            padding: 100px 20px 80px;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero-subtitle {
+            color: #ff6b35;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .hero-title {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-title span {
+            color: #27ae60;
+        }
+
+        .hero-description {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+            padding: 15px 35px;
+            border-radius: 30px;
+            border: 2px solid #27ae60;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        /* Offer Section - HIGHLIGHT 3 KELAS */
+        .offer-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 100px 20px;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 60px;
+        }
+
+        .section-subtitle {
+            color: #ff6b35;
+            font-size: 1.1em;
+            font-weight: 600;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 2.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .section-description {
+            font-size: 1.1em;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .offer-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .offer-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .offer-card-header {
+            padding: 30px 30px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+        }
+
+        .offer-card-header h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .offer-card-header p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        /* 3 Kelas Kematangan dengan Highlight */
+        .ripeness-classes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .ripeness-class {
+            text-align: center;
+            padding: 15px 10px;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .ripeness-class:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        /* Highlight untuk setiap kelas */
+        .ripeness-class.unripe {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-left: 4px solid #4caf50;
+        }
+
+        .ripeness-class.ripe {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 4px solid #ff9800;
+        }
+
+        .ripeness-class.overripe {
+            background: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+            border-left: 4px solid #e91e63;
+        }
+
+        .ripeness-class img {
+            width: 100%;
+            max-width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .ripeness-class.unripe img {
+            border-color: #4caf50;
+        }
+
+        .ripeness-class.ripe img {
+            border-color: #ff9800;
+        }
+
+        .ripeness-class.overripe img {
+            border-color: #e91e63;
+        }
+
+        .ripeness-label {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .ripeness-class.unripe .ripeness-label {
+            color: #2e7d32;
+        }
+
+        .ripeness-class.ripe .ripeness-label {
+            color: #f57c00;
+        }
+
+        .ripeness-class.overripe .ripeness-label {
+            color: #c2185b;
+        }
+
+        .offer-content {
+            padding: 20px 30px 30px;
+        }
+
+        .offer-content p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .offer-btn {
+            background: #27ae60;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .offer-btn:hover {
+            background: #229954;
+            transform: translateX(5px);
+        }
+
+        /* Detection Section */
+        .detection-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f8f9fa 100%);
+            padding: 100px 20px;
+        }
+
+        .detection-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .detection-header {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .detection-header h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .detection-content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            color: #27ae60;
+        }
+
+        .tab-button.active {
+            color: #27ae60;
+            border-bottom-color: #27ae60;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-area {
+            border: 3px dashed #27ae60;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: #e8f8f5;
+            border-color: #229954;
+        }
+
+        .upload-icon {
+            font-size: 5em;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .camera-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #000;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-image {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .prediction-label {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 40px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s;
+        }
+
+        .probabilities {
+            margin-top: 30px;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #27ae60;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            border: 1px solid #fcc;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .ripeness-classes {
+                grid-template-columns: 1fr;
+            }
+
+            .offer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span>🍎</span>
+                <span>FruitRipe AI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#beranda" class="nav-item active">Beranda</a></li>
+                <li><a href="#fitur" class="nav-item">Fitur</a></li>
+                <li><a href="#deteksi" class="nav-item">Deteksi</a></li>
+            </ul>
+            <button class="btn-callback" onclick="document.querySelector('#deteksi').scrollIntoView({behavior: 'smooth'})">Mulai Deteksi</button>
+        </div>
+    </nav>
+
+    <section class="hero-section" id="beranda">
+        <div class="hero-content">
+            <div class="hero-subtitle">Think With Heart</div>
+            <h1 class="hero-title">Deteksi <span>Kematangan Buah</span> dengan AI</h1>
+            <p class="hero-description">
+                Gunakan teknologi Deep Learning (Xception) terdepan untuk mendeteksi tingkat kematangan buah secara akurat. 
+                Dukung industri pertanian dengan solusi cerdas dan efisien.
+            </p>
+            <div class="hero-buttons">
+                <a href="#deteksi" class="btn-primary">Mulai Deteksi</a>
+                <a href="#fitur" class="btn-primary">Pelajari Lebih Lanjut</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="offer-section" id="fitur">
+        <div class="section-header">
+            <div class="section-subtitle">Don't Panic Go Organic</div>
+            <h2 class="section-title">Apa yang Kami Tawarkan</h2>
+            <p class="section-description">
+                Kami menghubungkan teknologi AI dengan industri pertanian untuk memberikan solusi terbaik dalam 
+                deteksi kematangan buah. Dengan menggunakan Convolutional Neural Network (CNN) arsitektur Xception, kami dapat 
+                mengklasifikasikan buah menjadi tiga kategori: <strong>Unripe</strong>, <strong>Ripe</strong>, dan <strong>Overripe</strong>.
+            </p>
+        </div>
+        <div class="offer-grid">
+            <div class="offer-card">
+                <div class="offer-card-header" style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);">
+                    <h3>Unripe</h3>
+                    <p>Buah Belum Matang</p>
+                </div>
+                <div class="ripeness-classes">
+                    <div class="ripeness-class unripe">
+                        <img src="{{ url_for('static', filename='images/apple_unripe.jpg') }}" alt="Apel Unripe">
+                        <div class="ripeness-label">Apel</div>
+                    </div>
+                    <div class="ripeness-class unripe">
+                        <img src="{{ url_for('static', filename='images/banana_unripe.jpg') }}" alt="Pisang Unripe">
+                        <div class="ripeness-label">Pisang</div>
+                    </div>
+                    <div class="ripeness-class unripe">
+                        <img src="{{ url_for('static', filename='images/mango_unripe.jpg') }}" alt="Mangga Unripe">
+                        <div class="ripeness-label">Mangga</div>
+                    </div>
+                </div>
+                <div class="offer-content">
+                    <p><strong>Unripe</strong> adalah kondisi buah yang belum matang. Buah dalam kondisi ini biasanya memiliki tekstur keras, warna hijau atau belum sepenuhnya berubah, dan rasa yang masih asam atau belum manis.</p>
+                    <p style="margin-top: 15px; color: #2e7d32; font-weight: 600;">✓ Tekstur keras<br>✓ Warna hijau/mentah<br>✓ Rasa asam</p>
+                    <a href="#deteksi" class="offer-btn">Coba Deteksi <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="offer-card-header" style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">
+                    <h3>Ripe</h3>
+                    <p>Buah Matang</p>
+                </div>
+                <div class="ripeness-classes">
+                    <div class="ripeness-class ripe">
+                        <img src="{{ url_for('static', filename='images/apple_ripe.jpg') }}" alt="Apel Ripe">
+                        <div class="ripeness-label">Apel</div>
+                    </div>
+                    <div class="ripeness-class ripe">
+                        <img src="{{ url_for('static', filename='images/banana_ripe.jpg') }}" alt="Pisang Ripe">
+                        <div class="ripeness-label">Pisang</div>
+                    </div>
+                    <div class="ripeness-class ripe">
+                        <img src="{{ url_for('static', filename='images/mango_ripe.jpg') }}" alt="Mangga Ripe">
+                        <div class="ripeness-label">Mangga</div>
+                    </div>
+                </div>
+                <div class="offer-content">
+                    <p><strong>Ripe</strong> adalah kondisi buah yang sudah matang sempurna. Buah dalam kondisi ini memiliki tekstur yang lembut namun masih padat, warna yang cerah, serta rasa yang manis.</p>
+                    <p style="margin-top: 15px; color: #f57c00; font-weight: 600;">✓ Tekstur lembut<br>✓ Warna cerah menarik<br>✓ Rasa manis optimal</p>
+                    <a href="#deteksi" class="offer-btn">Coba Deteksi <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+
+            <div class="offer-card">
+                <div class="offer-card-header" style="background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);">
+                    <h3>Overripe</h3>
+                    <p>Buah Terlalu Matang</p>
+                </div>
+                <div class="ripeness-classes">
+                    <div class="ripeness-class overripe">
+                        <img src="{{ url_for('static', filename='images/apple_overripe.png') }}" alt="Apel Overripe">
+                        <div class="ripeness-label">Apel</div>
+                    </div>
+                    <div class="ripeness-class overripe">
+                        <img src="{{ url_for('static', filename='images/banana_overripe.jpg') }}" alt="Pisang Overripe">
+                        <div class="ripeness-label">Pisang</div>
+                    </div>
+                    <div class="ripeness-class overripe">
+                        <img src="{{ url_for('static', filename='images/mango_overripe.jpeg') }}" alt="Mangga Overripe">
+                        <div class="ripeness-label">Mangga</div>
+                    </div>
+                </div>
+                <div class="offer-content">
+                    <p><strong>Overripe</strong> adalah kondisi buah yang sudah terlalu matang. Buah dalam kondisi ini memiliki tekstur yang sangat lunak, warna yang menggelap, serta mungkin mulai membusuk.</p>
+                    <p style="margin-top: 15px; color: #c2185b; font-weight: 600;">✓ Tekstur sangat lunak<br>✓ Warna gelap/berubah<br>✓ Mulai membusuk</p>
+                    <a href="#deteksi" class="offer-btn">Coba Deteksi <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="detection-section" id="deteksi">
+        <div class="detection-container">
+            <div class="detection-header">
+                <h2>📤 Deteksi Kematangan Buah</h2>
+                <p>Upload gambar atau gunakan kamera untuk mendeteksi tingkat kematangan buah</p>
+            </div>
+            <div class="detection-content">
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('upload')">📤 Upload Gambar</button>
+                    <button class="tab-button" onclick="switchTab('camera')">📷 Kamera</button>
+                </div>
+
+                <div id="upload-tab" class="tab-content active">
+                    <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Klik atau drag & drop gambar di sini</div>
+                        <div style="color: #999; font-size: 1em; margin-top: 10px;">Format: JPG, PNG, JPEG</div>
+                    </div>
+                    <input type="file" id="file-input" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn" onclick="document.getElementById('file-input').click()">Pilih Gambar</button>
+                    </div>
+                </div>
+
+                <div id="camera-tab" class="tab-content">
+                    <div class="camera-container">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="camera-controls">
+                            <button class="btn" id="start-camera-btn" onclick="startCamera()">🎥 Mulai Kamera</button>
+                            <button class="btn btn-danger" id="stop-camera-btn" onclick="stopCamera()" style="display: none;">⏹️ Stop Kamera</button>
+                            <button class="btn" id="capture-btn" onclick="capturePhoto()" style="display: none;">📸 Ambil Foto</button>
+                        </div>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p style="font-size: 1.2em; color: #666;">Memproses gambar dengan Model Xception...</p>
+                </div>
+
+                <div class="error" id="error"></div>
+
+                <div class="result-container" id="result-container">
+                    <div style="text-align: center;">
+                        <img id="result-image" class="result-image" alt="Predicted image">
+                        <div class="prediction-label" id="prediction-label"></div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence-fill"></div>
+                        </div>
+                        <div class="probabilities" id="probabilities"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let stream = null;
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+
+        // Scroll Spy (Agar menu navigasi aktif sesuai posisi scroll)
+        window.addEventListener('scroll', () => {
+            const sections = ['beranda', 'fitur', 'deteksi'];
+            const navItems = document.querySelectorAll('.nav-item');
+            let current = '';
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    if (rect.top <= 150 && rect.bottom >= 150) {
+                        current = section;
+                    }
+                }
+            });
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + current) {
+                    item.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth Scroll for Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            if (tab === 'upload') {
+                document.getElementById('upload-tab').classList.add('active');
+                document.querySelectorAll('.tab-button')[0].classList.add('active');
+            } else {
+                document.getElementById('camera-tab').classList.add('active');
+                document.querySelectorAll('.tab-button')[1].classList.add('active');
+            }
+            document.getElementById('result-container').classList.remove('show');
+        }
+
+        // Drag & Drop Handling
+        const uploadArea = document.getElementById('upload-area');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#d5f4e6';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '#f8f9fa';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f8f9fa';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Silakan pilih file gambar yang valid');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('image', file);
+            showLoading();
+            hideError();
+            hideResult();
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    showResult(data);
+                } else {
+                    showError(data.error || 'Terjadi kesalahan saat memproses gambar');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Terjadi kesalahan: ' + error.message);
+            });
+        }
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: 'environment' } 
+                });
+                video.srcObject = stream;
+                document.getElementById('start-camera-btn').style.display = 'none';
+                document.getElementById('stop-camera-btn').style.display = 'inline-block';
+                document.getElementById('capture-btn').style.display = 'inline-block';
+                hideError(); // Sembunyikan error jika sebelumnya ada
+            } catch (error) {
+                showError('Tidak dapat mengakses kamera: ' + error.message);
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+                video.srcObject = null;
+                document.getElementById('start-camera-btn').style.display = 'inline-block';
+                document.getElementById('stop-camera-btn').style.display = 'none';
+                document.getElementById('capture-btn').style.display = 'none';
+            }
+        }
+
+        function capturePhoto() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            const imageData = canvas.toDataURL('image/jpeg');
+            showLoading();
+            hideError();
+            hideResult();
+            fetch('/predict_camera', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    // Update image view jika sukses
+                    document.getElementById('result-image').src = imageData;
+                    showResult(data);
+                } else {
+                    showError(data.error || 'Terjadi kesalahan saat memproses gambar');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Terjadi kesalahan: ' + error.message);
+            });
+        }
+
+        function showResult(data) {
+            const resultContainer = document.getElementById('result-container');
+            const resultImage = document.getElementById('result-image');
+            const predictionLabel = document.getElementById('prediction-label');
+            const confidenceFill = document.getElementById('confidence-fill');
+            const probabilitiesDiv = document.getElementById('probabilities');
+
+            if (data.image) {
+                resultImage.src = 'data:image/jpeg;base64,' + data.image;
+            }
+
+            // MAPPING TEXT & EMOJI SESUAI MODEL
+            const predictionText = {
+                'Unripe': 'Unripe 🍏',
+                'Ripe': 'Ripe 🍎',
+                'Overripe': 'Overripe 🍌' // Pastikan ini cocok dengan output backend
+            };
+
+            predictionLabel.textContent = `Prediksi: ${predictionText[data.prediction] || data.prediction}`;
+            const confidencePercent = (data.confidence * 100).toFixed(2);
+            confidenceFill.style.width = confidencePercent + '%';
+            confidenceFill.textContent = confidencePercent + '%';
+
+            probabilitiesDiv.innerHTML = '<h3 style="margin-bottom: 15px; color: #2c3e50;">Probabilitas Semua Kelas:</h3>';
+            
+            // Urutkan probabilitas dari yang terbesar
+            const sortedProbs = Object.entries(data.all_probabilities).sort((a, b) => b[1] - a[1]);
+
+            sortedProbs.forEach(([className, prob]) => {
+                const probPercent = (prob * 100).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'probability-item';
+                
+                const classEmoji = {
+                    'Unripe': '🍏',
+                    'Ripe': '🍎',
+                    'Overripe': '🍌' // Typo 'Overipe' diperbaiki jadi 'Overripe'
+                };
+                
+                item.innerHTML = `
+                    <span style="font-weight: 600; color: #333; font-size: 1.1em;">${classEmoji[className] || ''} ${className}</span>
+                    <span style="color: #27ae60; font-weight: bold; font-size: 1.2em;">${probPercent}%</span>
+                `;
+                probabilitiesDiv.appendChild(item);
+            });
+
+            resultContainer.classList.add('show');
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideResult() {
+            document.getElementById('result-container').classList.remove('show');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        window.addEventListener('beforeunload', () => {
+            stopCamera();
+        });
+    </script>
+</body>
+</html>
